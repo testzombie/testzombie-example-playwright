@@ -1,0 +1,32 @@
+{
+  "name": "testzombie-playwright-demo",
+  "version": "0.2.0-beta.1",
+  "private": true,
+  "description": "TestZombie AI Playwright demo and acceptance suite using the published @testzombie/playwright package",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test tests/onboarding-flow.spec.ts --project=chromium",
+    "test:baseline": "playwright test tests/onboarding-flow.spec.ts --project=chromium --grep @baseline",
+    "test:healing": "playwright test tests/onboarding-flow.spec.ts --project=chromium",
+    "test:headed": "playwright test tests/onboarding-flow.spec.ts --project=chromium --headed",
+    "test:healing:headed": "playwright test tests/onboarding-flow.spec.ts --project=chromium --headed",
+    "test:firefox": "playwright test tests/onboarding-flow.spec.ts --project=firefox",
+    "test:webkit": "playwright test tests/onboarding-flow.spec.ts --project=webkit",
+    "test:all-browsers": "playwright test tests/onboarding-flow.spec.ts",
+    "test:debug": "playwright test tests/onboarding-flow.spec.ts --project=chromium --debug",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit",
+    "test:acceptance": "playwright test tests/acceptance/actions.spec.ts tests/acceptance/locators.spec.ts tests/acceptance/failures.spec.ts --project=chromium",
+    "test:acceptance:headed": "playwright test tests/acceptance/actions.spec.ts tests/acceptance/locators.spec.ts tests/acceptance/failures.spec.ts --project=chromium --headed",
+    "test:acceptance:all-browsers": "playwright test tests/acceptance/actions.spec.ts tests/acceptance/locators.spec.ts tests/acceptance/failures.spec.ts",
+    "test:parallel": "playwright test tests/acceptance/parallel.spec.ts --project=chromium --workers=8 --fully-parallel",
+    "test:parallel:all-browsers": "playwright test tests/acceptance/parallel.spec.ts --workers=8 --fully-parallel",
+    "test:release-check": "npm run typecheck && npm run test:acceptance:all-browsers && npm run test:parallel"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0",
+    "@testzombie/playwright": "0.2.0-beta.1"
+  }
+}

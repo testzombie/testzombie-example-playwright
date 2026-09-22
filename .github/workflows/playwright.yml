@@ -1,0 +1,32 @@
+name: Playwright Demo
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - run: npm run typecheck
+      - run: npm run test:baseline
+        env:
+          HEADLESS: 'true'
+          TESTZOMBIE_API_KEY: ${{ secrets.TESTZOMBIE_API_KEY }}
+          TESTZOMBIE_EMAIL: ${{ secrets.TESTZOMBIE_EMAIL }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-failure-artifacts
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
