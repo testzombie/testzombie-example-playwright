@@ -1,147 +1,217 @@
-# TestZombie Playwright Demo
+# TestZombie Playwright Example
 
-Separates Beispiel- und Acceptance-Projekt für `@testzombie/playwright`.
-Die TestZombie-Library ist **nicht** in diesem Repository eingebettet. Sie wird normal über npm installiert.
+A small Playwright project that demonstrates **TestZombie Self-Healing** and optional **Persistent Healing** with `@testzombie/playwright`.
 
-## Voraussetzungen
+The example intentionally uses normal Playwright tests and Page Objects. There are no TestZombie-specific fallback locators in the test code.
 
-- Node.js 20+
-- npm
-- Zugriff auf `http://demoweb2.testzombie.ai`
-- TestZombie API-Key und E-Mail
-- veröffentlichte npm-Version `@testzombie/playwright@0.2.0-beta.1`
+## Quick start — 1, 2, 3
 
-## Installation
+### 1. Install
+
+Clone the project and install the dependencies:
 
 ```bash
 npm install
-npx playwright install
-```
-
-Nur Chromium:
-
-```bash
 npx playwright install chromium
 ```
 
-Die `package.json` referenziert direkt:
+The example currently uses:
 
-```json
-"@testzombie/playwright": "0.2.0-beta.1"
+```text
+@testzombie/playwright@1.0.0-rc.1
 ```
 
-Sobald eine neuere Beta getestet werden soll, kann alternativ installiert werden mit:
+In an existing Playwright project, TestZombie is installed with:
 
 ```bash
-npm install -D @testzombie/playwright@beta
+npm install -D @testzombie/playwright
 ```
 
-## Credentials
+### 2. Configure TestZombie
 
-Am besten lokal über Environment Variables oder eine nicht eingecheckte `.env`-Datei setzen.
-Die Beispielwerte stehen in `.env.example`.
+Set your TestZombie API key and account e-mail before starting the tests. Register free account on testzombie.ai
 
-PowerShell:
+**Windows CMD**
+
+```cmd
+set TESTZOMBIE_API_KEY=your-api-key
+set TESTZOMBIE_EMAIL=you@example.com
+```
+
+**PowerShell**
 
 ```powershell
-$env:TESTZOMBIE_API_KEY="..."
-$env:TESTZOMBIE_EMAIL="..."
+$env:TESTZOMBIE_API_KEY="your-api-key"
+$env:TESTZOMBIE_EMAIL="you@example.com"
 ```
 
-Linux/macOS:
+**Linux / macOS**
 
 ```bash
-export TESTZOMBIE_API_KEY="..."
-export TESTZOMBIE_EMAIL="..."
+export TESTZOMBIE_API_KEY="your-api-key"
+export TESTZOMBIE_EMAIL="you@example.com"
 ```
 
-Optional:
+**direct Playwright Config in playwright.config.ts**
+```bash
+add variables directly to try
+process.env.TESTZOMBIE_API_KEY = '';
+process.env.TESTZOMBIE_EMAIL = '';
+// add successfull healings directly to the code 
+process.env.TESTZOMBIE_SOURCE_UPDATE_MODE = 'apply';
+```
+
+
+
+Optional variables are documented in `.env.example`.
+
+### 3. Run the demo
+
+Run the complete five-level onboarding flow in Chromium:
 
 ```bash
-export TESTZOMBIE_API_URL="https://testzombie.ai/api/"
+npm test
 ```
 
-## Integration
+To watch the browser:
 
-Der zentrale Import liegt in `src/support/framework.ts`:
+```bash
+npm run test:headed
+```
+
+The demo runs the same business flow through:
+
+```text
+OFF → LIGHT → REALISTIC → HARD → EXTREME
+```
+
+At higher mutation levels the original locators become invalid. TestZombie attempts to identify the correct element and continues the Playwright action with the healed locator.
+
+---
+
+## How TestZombie is integrated
+
+The central integration is intentionally small.
+
+Normal Playwright:
+
+```ts
+import { test, expect } from '@playwright/test';
+```
+
+With TestZombie:
+
+```ts
+import { test, expect } from '@testzombie/playwright';
+```
+
+This example centralizes that import in `src/support/framework.ts`:
 
 ```ts
 export { expect, test } from '@testzombie/playwright';
 export type { Locator, Page, TestInfo } from '@playwright/test';
 ```
 
-Die Page Objects und Tests benötigen dadurch keinen TestZombie-spezifischen Code.
+Existing Page Objects and tests can otherwise keep using normal Playwright APIs.
 
-## Demo-Flow
+## Optional: Persistent Healing / code updates
 
-Der vollständige Onboarding-Flow läuft über fünf Mutation Levels:
+Runtime healing is enabled by using the TestZombie `test` fixture. Source-code updates are **optional**.
 
-```text
-OFF
-LIGHT
-REALISTIC
-HARD
-EXTREME
-```
+### Preview changes without modifying files
 
-Chromium:
+**Windows CMD**
 
-```bash
+```cmd
+set TESTZOMBIE_SOURCE_UPDATE_MODE=preview
 npm test
 ```
 
-Sichtbar:
+**PowerShell**
 
-```bash
-npm run test:headed
+```powershell
+$env:TESTZOMBIE_SOURCE_UPDATE_MODE="preview"
+npm test
 ```
 
-Einzelne Browser:
+TestZombie reports the source update it would apply, but leaves the files unchanged.
 
-```bash
-npm run test:firefox
-npm run test:webkit
+### Apply successful healings to source code
+
+**Windows CMD**
+
+```cmd
+set TESTZOMBIE_SOURCE_UPDATE_MODE=apply
+npm test
 ```
 
-Alle drei Browser:
+**PowerShell**
 
-```bash
-npm run test:all-browsers
+```powershell
+$env:TESTZOMBIE_SOURCE_UPDATE_MODE="apply"
+npm test
 ```
 
-Nur stabile Baseline (`OFF`):
+After the run, inspect the changes with:
 
 ```bash
-npm run test:baseline
+git diff
 ```
 
-## Acceptance Suite
+For the first Persistent-Healing run, keep the project at one worker. This example already uses `workers: 1` by default.
 
-Isolierte Tests für Actions, Locator-Typen und Failure-Safety:
+### Page Object constants are supported
 
-```bash
-npm run test:acceptance
+The example can use normal immutable Page Object selectors:
+
+```ts
+private static readonly SAVE_BILLING = '#payButton';
+
+async saveBilling(): Promise<void> {
+  await this.click(CheckoutPage.SAVE_BILLING);
+}
 ```
 
-Alle Browser:
+If TestZombie successfully heals `#payButton`, Persistent Healing can update the selector declaration while leaving the action call unchanged:
 
-```bash
-npm run test:acceptance:all-browsers
+```ts
+// TestZombie original locator [...] - healed at ...
+// private static readonly SAVE_BILLING = '#payButton';
+private static readonly SAVE_BILLING = '[data-automation-id="pay-healed"]';
 ```
 
-8 Worker / Parallel-Isolation:
+Mutable `let` / `var` selectors are intentionally not rewritten.
 
-```bash
-npm run test:parallel
+To disable source updates again:
+
+**Windows CMD**
+
+```cmd
+set TESTZOMBIE_SOURCE_UPDATE_MODE=off
 ```
 
-Kompletter Release-Check:
+**PowerShell**
 
-```bash
-npm run test:release-check
+```powershell
+$env:TESTZOMBIE_SOURCE_UPDATE_MODE="off"
 ```
 
-## Projektstruktur
+## Useful commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm test` | Complete onboarding flow in Chromium |
+| `npm run test:headed` | Chromium with visible browser |
+| `npm run test:baseline` | Only the OFF baseline |
+| `npm run test:firefox` | Onboarding flow in Firefox |
+| `npm run test:webkit` | Onboarding flow in WebKit |
+| `npm run test:all-browsers` | Onboarding flow in all three browsers |
+| `npm run test:acceptance` | Acceptance suite in Chromium |
+| `npm run test:acceptance:all-browsers` | Acceptance suite in all three browsers |
+| `npm run test:parallel` | Parallel-isolation suite with 8 workers |
+| `npm run test:release-check` | Typecheck + browser acceptance + parallel test |
+
+## Project structure
 
 ```text
 src/
@@ -167,8 +237,26 @@ tests/
 └── test.ts
 ```
 
-## Wichtig
+## Browser support
 
-Das Projekt enthält bewusst **keine Locator-Fallbacks im Testcode**. Der jeweils ursprüngliche Locator soll bei DOM-Mutationen durch TestZombie geheilt werden.
+The project contains Playwright projects for:
 
-Es enthält außerdem **kein lokales npm-Tarball** der TestZombie-Library. Die Demo bleibt damit unabhängig von der Library-Quelle und testet denselben Installationsweg wie ein späterer Kunde.
+- Chromium
+- Firefox
+- WebKit
+
+Install all browsers with:
+
+```bash
+npx playwright install
+```
+
+## Security
+
+Never commit `TESTZOMBIE_API_KEY`, account credentials or browser session data. Use environment variables or your CI/CD secret store.
+
+The checked-in `.env.example` contains variable names only; this project does not load `.env` automatically.
+
+## More validation
+
+`ACCEPTANCE.md` describes the isolated action, locator, failure-safety and parallel-isolation coverage used for the adapter release checks.

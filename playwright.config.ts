@@ -1,5 +1,17 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// TestZombie reads its credentials directly from environment variables.
+// Do not hardcode API keys or account credentials in this repository.
+//
+// Required:
+//   TESTZOMBIE_API_KEY
+//   TESTZOMBIE_EMAIL
+//
+// Optional Persistent Healing:
+//   TESTZOMBIE_SOURCE_UPDATE_MODE=off | preview | apply
+//   TESTZOMBIE_SOURCE_UPDATE_ROOT=<project root>
+process.env.TESTZOMBIE_SOURCE_UPDATE_ROOT ??= process.cwd();
+
 const baseURL = (process.env.BASE_URL ?? 'http://demoweb2.testzombie.ai').replace(/\/$/, '');
 const headless = process.env.HEADLESS
   ? process.env.HEADLESS.toLowerCase() === 'true'
