@@ -2,7 +2,12 @@
 
 This repository is the standalone consumer/demo project for `@testzombie/playwright`.
 
-It demonstrates Self-Healing, Discovery and optional Persistent Healing using the same npm package and Playwright APIs a customer project would use.
+It demonstrates Self-Healing, Discovery and Persistent Healing / Code Update using the same npm package and Playwright APIs a customer project would use.
+
+The two focused feature demos are intentionally separate:
+
+- `npm run test:discovery` observes a stable Level-0 business flow.
+- `npm run test:codeupdate` heals a Level-1 flow and persists successful locator updates back into the Page Objects.
 
 It intentionally consumes the library from npm exactly like a customer project.
 

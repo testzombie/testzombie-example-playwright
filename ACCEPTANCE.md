@@ -13,6 +13,7 @@ This suite is the release gate for the Playwright adapter. It complements the fi
 | Parallel isolation | 8 independent tests with unique worker tokens and HARD locator healing |
 | Browsers | scripts provided for Chromium only or Chromium + Firefox + WebKit |
 | Discovery example | dedicated stable Mutation Level 0 onboarding flow via `npm run test:discovery` |
+| Code Update example | dedicated Mutation Level 1 onboarding flow with source update via `npm run test:codeupdate` |
 
 ## Test model
 

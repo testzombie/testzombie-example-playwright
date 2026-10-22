@@ -161,6 +161,79 @@ Self-Healing  → keep the automated flow running when locators change
 
 ---
 
+## Code Update — heal Level 1 and update the source
+
+Discovery learns a working flow. The **Code Update** example demonstrates the next maintenance step: what happens when the application changes and an existing Playwright locator no longer matches.
+
+Run the dedicated example with:
+
+```bash
+npm run test:codeupdate
+```
+
+This test runs the same onboarding journey on **Mutation Level 1 / LIGHT** and enables Persistent Healing in `apply` mode only for this scenario.
+
+### What should happen?
+
+In simple terms:
+
+```text
+Existing Playwright test
+        ↓
+Mutation Level 1 changes the UI / locators
+        ↓
+original locator no longer works
+        ↓
+TestZombie heals the element at runtime
+        ↓
+action succeeds with the healed locator
+        ↓
+Code Update writes the working locator back to the Page Object
+```
+
+The important point is that the test code does **not** contain manual fallback locators. TestZombie first proves that the healed locator really works and only then persists the successful update.
+
+The dedicated example is in:
+
+```text
+tests/codeupdate-level1.spec.ts
+```
+
+It enables Code Update explicitly:
+
+```ts
+import { TestZombie } from '@testzombie/playwright';
+
+TestZombie.configure({
+  sourceUpdateMode: 'apply',
+  sourceUpdateRoot: process.cwd(),
+  discoveryEnabled: false,
+});
+```
+
+After the test completes, inspect the changed Page Object selectors with:
+
+```bash
+git diff src/pages
+```
+
+For example, an immutable selector constant can be changed from the old locator to the successfully healed locator while the actual Page Object action remains untouched.
+
+To reset the demo and run it again from the original state:
+
+```bash
+git restore src/pages
+```
+
+This keeps the two examples intentionally separate:
+
+```text
+Discovery Level 0   → learn a valid business flow
+Code Update Level 1 → heal a changed UI and persist the working locator
+```
+
+---
+
 ## How TestZombie is integrated
 
 The central integration is intentionally small.
@@ -188,9 +261,9 @@ Existing Page Objects and tests can otherwise keep using normal Playwright APIs.
 
 ---
 
-## Optional: Persistent Healing / code updates
+## Optional: Persistent Healing modes
 
-Runtime healing is enabled by using the TestZombie `test` fixture. Source-code updates are **optional**.
+The dedicated `npm run test:codeupdate` scenario above enables `apply` only for that one Level-1 demonstration. In other tests, source-code updates remain **optional** and can also be controlled through environment variables.
 
 ### Preview changes without modifying files
 
@@ -278,6 +351,7 @@ $env:TESTZOMBIE_SOURCE_UPDATE_MODE="off"
 | --- | --- |
 | `npm test` | Complete five-level onboarding flow in Chromium |
 | `npm run test:discovery` | Stable Level-0 flow with Discovery enabled |
+| `npm run test:codeupdate` | Level-1 onboarding with runtime healing + source-code update |
 | `npm run test:headed` | Chromium with visible browser |
 | `npm run test:baseline` | Only the OFF baseline |
 | `npm run test:firefox` | Onboarding flow in Firefox |
@@ -311,6 +385,7 @@ tests/
 │   ├── helpers.ts
 │   ├── locators.spec.ts
 │   └── parallel.spec.ts
+├── codeupdate-level1.spec.ts
 ├── discovery-level0.spec.ts
 ├── onboarding-flow.spec.ts
 └── test.ts
