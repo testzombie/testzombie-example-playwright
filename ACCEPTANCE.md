@@ -12,6 +12,7 @@ This suite is the release gate for the Playwright adapter. It complements the fi
 | Backend behavior | fail-open continues with native Playwright, fail-closed rejects initialization |
 | Parallel isolation | 8 independent tests with unique worker tokens and HARD locator healing |
 | Browsers | scripts provided for Chromium only or Chromium + Firefox + WebKit |
+| Discovery example | dedicated stable Mutation Level 0 onboarding flow via `npm run test:discovery` |
 
 ## Test model
 

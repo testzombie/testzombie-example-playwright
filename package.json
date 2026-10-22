@@ -1,12 +1,13 @@
 {
   "name": "testzombie-playwright-demo",
-  "version": "0.2.0-beta.1",
+  "version": "1.0.0",
   "private": true,
-  "description": "TestZombie AI Playwright demo and acceptance suite using the published @testzombie/playwright package",
+  "description": "Standalone TestZombie Playwright example for Self-Healing, Discovery and Persistent Healing",
   "type": "module",
   "scripts": {
     "test": "playwright test tests/onboarding-flow.spec.ts --project=chromium",
     "test:baseline": "playwright test tests/onboarding-flow.spec.ts --project=chromium --grep @baseline",
+    "test:discovery": "playwright test tests/discovery-level0.spec.ts --project=chromium --workers=1",
     "test:healing": "playwright test tests/onboarding-flow.spec.ts --project=chromium",
     "test:headed": "playwright test tests/onboarding-flow.spec.ts --project=chromium --headed",
     "test:healing:headed": "playwright test tests/onboarding-flow.spec.ts --project=chromium --headed",
@@ -21,12 +22,13 @@
     "test:acceptance:all-browsers": "playwright test tests/acceptance/actions.spec.ts tests/acceptance/locators.spec.ts tests/acceptance/failures.spec.ts",
     "test:parallel": "playwright test tests/acceptance/parallel.spec.ts --project=chromium --workers=8 --fully-parallel",
     "test:parallel:all-browsers": "playwright test tests/acceptance/parallel.spec.ts --workers=8 --fully-parallel",
-    "test:release-check": "npm run typecheck && npm run test:acceptance:all-browsers && npm run test:parallel"
+    "test:release-check": "npm run typecheck && npm run test:acceptance:all-browsers && npm run test:parallel",
+    "update:testzombie": "npm update @testzombie/playwright"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
+    "@testzombie/playwright": "^1.0.0",
     "@types/node": "^22.0.0",
-    "typescript": "^5.8.0",
-    "@testzombie/playwright": "0.2.0-beta.1"
+    "typescript": "^5.8.0"
   }
 }

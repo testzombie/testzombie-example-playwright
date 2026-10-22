@@ -2,11 +2,16 @@
 
 This repository is the standalone consumer/demo project for `@testzombie/playwright`.
 
-It must not contain:
+It demonstrates Self-Healing, Discovery and optional Persistent Healing using the same npm package and Playwright APIs a customer project would use.
+
+It intentionally consumes the library from npm exactly like a customer project.
+
+Do not commit:
 
 - `packages/*.tgz`
 - the TestZombie Playwright library source
 - `node_modules`
 - `.env` files or credentials
+- Playwright reports, traces, screenshots, videos or test-results
 
-The library is consumed exactly like a customer dependency from npm.
+The repository itself is marked `private: true` in `package.json` so it cannot be published to npm accidentally.
